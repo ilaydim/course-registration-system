@@ -246,7 +246,7 @@ def main():
     # Aggregate results
     aggregated = aggregator.aggregate_hierarchical(classified)
 
-    # Export results (JSON)
+    # Export results (JSON format)
     with open("output/aggregated_results.json", "w", encoding="utf-8") as f:
         json.dump(aggregated, f, ensure_ascii=False, indent=2)
 

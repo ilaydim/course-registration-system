@@ -18,3 +18,4 @@ class WebScraper:
                 "language": "TR"
             })
         return data
+    
