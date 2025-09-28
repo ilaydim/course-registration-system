@@ -212,3 +212,99 @@ echo "- Restart service: sudo systemctl restart radicalization-research"
 echo "- Stop service: sudo systemctl stop radicalization-research"
 echo "- Check logs: sudo tail -f $DEPLOY_DIR/logs/*.log"
 echo "- Test collection: sudo -u $SERVICE_USER $DEPLOY_DIR/venv/bin/python $DEPLOY_DIR/main.py --demo"
+
+import json
+from datetime import datetime
+from src.scraper import WebScraper
+from src.classifier import KeywordClassifier
+from src.aggregator import EnhancedAggregator
+
+def main():
+    # Load keywords (only Turkish/English, only Turkey-relevant categories)
+    classifier = KeywordClassifier("keywords.json")
+    aggregator = EnhancedAggregator()
+
+    # Collect data (web scraping, Turkey only)
+    scraper = WebScraper()
+    demo_data = scraper.collect_data(region="Turkey")
+
+    # Classify texts
+    classified = []
+    for item in demo_data:
+        matches = classifier.classify_text(item["text"], target_language=item.get("language", "TR"))
+        for category, keywords in matches.items():
+            classified.append({
+                "text": item["text"],
+                "platform": item["platform"],
+                "timestamp": item["timestamp"],
+                "location": item["location"],
+                "category": category,
+                "matched_keywords": keywords,
+                "language": classifier.detect_language(item["text"])
+            })
+
+    # Aggregate results
+    aggregated = aggregator.aggregate_hierarchical(classified)
+
+    # Export results (JSON)
+    with open("output/aggregated_results.json", "w", encoding="utf-8") as f:
+        json.dump(aggregated, f, ensure_ascii=False, indent=2)
+
+    print("✅ Aggregation complete. See output/aggregated_results.json")
+
+if __name__ == "__main__":
+    main()
+
+import requests
+from bs4 import BeautifulSoup
+from datetime import datetime
+
+class WebScraper:
+    def collect_data(self, region="Turkey"):
+        # Example: scrape headlines from hurriyet.com.tr
+        url = "https://www.hurriyet.com.tr/"
+        resp = requests.get(url)
+        soup = BeautifulSoup(resp.text, "html.parser")
+        headlines = [h.get_text() for h in soup.select("h3")][:10]
+        data = []
+        for headline in headlines:
+            data.append({
+                "text": headline,
+                "platform": "news",
+                "timestamp": datetime.now().isoformat(),
+                "location": "Turkey",
+                "language": "TR"
+            })
+        return data
+
+{
+  "PKK_Related": {
+    "TR": ["PKK", "hendek savaşı", "direniş"],
+    "EN": ["PKK", "ditch war", "resistance"]
+  },
+  "Religious_Radical": {
+    "TR": ["hilafet", "şeriat", "cihad"],
+    "EN": ["caliphate", "sharia", "jihad"]
+  }
+}
+
+from collections import Counter, defaultdict
+from datetime import datetime
+
+class EnhancedAggregator:
+    def aggregate_hierarchical(self, classified_data):
+        results = defaultdict(list)
+        counter = Counter()
+        for item in classified_data:
+            week = datetime.fromisoformat(item["timestamp"]).isocalendar()[1]
+            key = (item["location"], f"{datetime.now().year}-W{week:02d}", item["platform"], item["category"])
+            counter[key] += 1
+        for (region, week, platform, category), count in counter.items():
+            results["by_region"].append({
+                "region": region,
+                "week": week,
+                "platform": platform,
+                "category": category,
+                "count": count
+            })
+        return results
