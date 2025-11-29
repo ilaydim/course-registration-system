@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://university.com/registration"
+           xmlns:tns="http://university.com/registration"
+           elementFormDefault="qualified">
+
+    <xs:simpleType name="operationStatus">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ACCEPTED"/>
+            <xs:enumeration value="FAILED"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="statusPayload">
+        <xs:sequence>
+            <xs:element name="status" type="tns:operationStatus"/>
+            <xs:element name="message" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="scheduleEntry">
+        <xs:sequence>
+            <xs:element name="courseCode" type="xs:string"/>
+            <xs:element name="courseTitle" type="xs:string"/>
+            <xs:element name="sectionId" type="xs:long"/>
+            <xs:element name="term" type="xs:string"/>
+            <xs:element name="status" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Register -->
+    <xs:element name="RegisterCourseRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+                <xs:element name="courseCode" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="RegisterCourseResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="result" type="tns:statusPayload"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Drop -->
+    <xs:element name="DropCourseRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+                <xs:element name="courseCode" type="xs:string"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="DropCourseResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="result" type="tns:statusPayload"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- List schedule -->
+    <xs:element name="ListStudentScheduleRequest">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="studentId" type="xs:long"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="ListStudentScheduleResponse">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="entries" type="tns:scheduleEntry" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

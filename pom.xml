@@ -2,10 +2,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="
            http://maven.apache.org/POM/4.0.0
-           https://maven.apache.org/xsd/maven-4.0.0.xsd
-           http://java.sun.com/xml/ns/jaxb
-           http://java.sun.com/xml/ns/jaxb/bindingschema_2_0.xsd">
-
+           https://maven.apache.org/xsd/maven-4.0.0.xsd">
 <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.university</groupId>
@@ -30,14 +27,13 @@
     </dependencyManagement>
 
     <dependencies>
-
-        <!-- SPRING BOOT CORE -->
+        <!-- Core -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- SOAP / Spring Web Services -->
+        <!-- SOAP -->
         <dependency>
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-core</artifactId>
@@ -46,14 +42,15 @@
             <groupId>org.springframework.ws</groupId>
             <artifactId>spring-ws-support</artifactId>
         </dependency>
-
-        <!-- JAXB Runtime (Java 17 uyumlu) -->
+        <dependency>
+            <groupId>wsdl4j</groupId>
+            <artifactId>wsdl4j</artifactId>
+            <version>1.6.3</version>
+        </dependency>
         <dependency>
             <groupId>org.glassfish.jaxb</groupId>
             <artifactId>jaxb-runtime</artifactId>
         </dependency>
-
-        <!-- Spring Web (DispatcherServlet için gerekiyor) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -65,16 +62,19 @@
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
 
-        <!-- JPA + Hibernate -->
+        <!-- JPA / DB -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <!-- MySQL Driver -->
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Test -->
@@ -83,58 +83,15 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <includes>
-                    <include>**/*.xsd</include>
-                </includes>
-            </resource>
-        </resources>
-
         <plugins>
-
-            <!-- JAXB XSD → Java class generator -->
-            <plugin>
-                <groupId>org.jvnet.jaxb2.maven2</groupId>
-                <artifactId>maven-jaxb2-plugin</artifactId>
-                <version>0.14.0</version>
-
-                <executions>
-                    <execution>
-                        <id>xsd-generate</id>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-
-                            <schemas>
-                                <schema>
-                                    <file>${project.basedir}/src/main/resources/schemas/registration.xsd</file>
-                                </schema>
-                            </schemas>
-
-                            <generateDirectory>${project.basedir}/src/main/java</generateDirectory>
-                            <generatePackage>com.university.api.generated</generatePackage>
-
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-
-
-            <!-- Spring Boot Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
             </plugin>
-
         </plugins>
     </build>
-
 </project>
